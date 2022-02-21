@@ -105,10 +105,11 @@ bool fileSplit(const string &fileName)
 			{
 				num1 = num2;
 			}
+		}
 		segmentsCount[j]--;
-	}
 		if (!originalFile.eof())
 		{
+	
 			if (segmentsCount[j] < segmentsCount[j + 1])
 			{
 				j++;
@@ -118,7 +119,7 @@ bool fileSplit(const string &fileName)
 				lvlCount++;
 				int temp = perfectDistribution[0];
 				j = 0;
-				for (int k = 0; k < filesAmount-2; k++)
+				for (int k = 0; k < filesAmount-1; k++)
 				{
 					segmentsCount[k] = perfectDistribution[k + 1] - perfectDistribution[k] + temp;
 					perfectDistribution[k] = perfectDistribution[k + 1] + temp;
@@ -131,6 +132,7 @@ bool fileSplit(const string &fileName)
 		}
 		else
 		{
+			*file[j] << num2 << " " << -1;
 			break;
 		}
 	}
@@ -144,7 +146,7 @@ bool fileSplit(const string &fileName)
 
 int main()
 {
-	createFileWithRandomNumbers("test.txt", 10, 100);
+	//createFileWithRandomNumbers("test.txt", 10, 100);
 	//cout << doesFileContainSortedArray("test.txt") ? true : false;
 	fileSplit("test.txt");
 }
