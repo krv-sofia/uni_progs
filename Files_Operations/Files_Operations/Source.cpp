@@ -296,6 +296,9 @@ bool fileSort(const string &fileName)
 		file[i]->close();
 	}
 	resultFile(file_name[0]);
+	delete[]perfectDistribution;
+	delete[]segmentsCount;
+
 }
 
 
