@@ -298,7 +298,12 @@ bool fileSort(const string &fileName)
 	resultFile(file_name[0]);
 	delete[]perfectDistribution;
 	delete[]segmentsCount;
-
+	delete[]file_name;
+	for (int i = 0; i < filesAmount; i++)
+	{
+		delete[] file[i];
+	}
+	delete[]*file;
 }
 
 
