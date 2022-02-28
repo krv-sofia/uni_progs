@@ -301,7 +301,7 @@ bool fileSort(const string &fileName)
 	
 	for (int i = 0; i < filesAmount; i++)
 	{
-		delete[] file[i];
+		delete file[i];
 	}
 	delete[]file;
 	delete[]file_name;
