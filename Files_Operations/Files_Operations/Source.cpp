@@ -92,6 +92,11 @@ bool fileSort(const string &fileName)
 		if (!file[i]->is_open())
 		{
 			cerr << "Can't create file";
+			for (int j = 0; j < filesAmount; j++)
+			{
+				delete file[j];
+			}
+			delete[]file;
 			return false;
 		}
 	}
@@ -99,6 +104,11 @@ bool fileSort(const string &fileName)
 	if (!originalFile.is_open())
 	{
 		cerr << "Can't open the original file";
+		for (int i = 0; i < filesAmount; i++)
+		{
+			delete file[i];
+		}
+		delete[]file;
 		return false;
 	}
 
@@ -179,6 +189,13 @@ bool fileSort(const string &fileName)
 		if (!file[i]->is_open())
 		{
 			cerr << "Can't open file";
+			delete[]perfectDistribution;
+			delete[]segmentsCount;
+			for (int j = 0; j < filesAmount - 1; j++)
+			{
+				delete file[j];
+			}
+			delete[]file;
 			return false;
 		}
 	}
@@ -187,6 +204,13 @@ bool fileSort(const string &fileName)
 	if (!file[filesAmount - 1]->is_open())
 	{
 		cerr << "Can't open file";
+		delete[]perfectDistribution;
+		delete[]segmentsCount;
+		for (int i = 0; i < filesAmount; i++)
+		{
+			delete file[i];
+		}
+		delete[]file;
 		return false;
 	}
 	while (lvlCount > 0)
@@ -268,12 +292,26 @@ bool fileSort(const string &fileName)
 		if (!file[filesAmount - 2]->is_open())
 		{
 			cerr << "Can't open file";
+			delete[]perfectDistribution;
+			delete[]segmentsCount;
+			for (int i = 0; i < filesAmount; i++)
+			{
+				delete file[i];
+			}
+			delete[]file;
 			return false;
 		}
 		file[filesAmount - 1]->open(file_name[filesAmount - 1], ios::in);
 		if (!file[filesAmount - 1]->is_open())
 		{
 			cerr << "Can't open file";
+			delete[]perfectDistribution;
+			delete[]segmentsCount;
+			for (int i = 0; i < filesAmount; i++)
+			{
+				delete file[i];
+			}
+			delete[]file;
 			return false;
 		}
 		fstream *tmpFile0 = file[filesAmount - 1];
@@ -298,13 +336,11 @@ bool fileSort(const string &fileName)
 	resultFile(file_name[0]);
 	delete[]perfectDistribution;
 	delete[]segmentsCount;
-	
 	for (int i = 0; i < filesAmount; i++)
 	{
 		delete file[i];
 	}
 	delete[]file;
-	delete[]file_name;
 }
 
 
