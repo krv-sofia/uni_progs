@@ -10,16 +10,18 @@ void main()
 	srand(time(0));
 	BinaryTree bt;
 	BinaryTree bt2;
+	BinaryTree bt3;
 	int treeSize = 8;
 	for (int i = 0; i < treeSize; i++)
 	{
 		bt.add_node(i);
 	}
 	//BinaryTree bt2(bt);
-	bt2 = bt;
+	bt3 = bt2 = bt;
 	cout << "print:\n";
 	bt.print_tree();
 	bt2.print_tree();
+	bt3.print_tree();
 	//bt.delete_subtrees();
 	//bt2.print_tree();
 	//cout << endl << bt.get_node_index(4) << endl << bt.get_key_by_index(4);

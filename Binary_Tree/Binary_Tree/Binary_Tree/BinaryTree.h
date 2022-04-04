@@ -51,7 +51,7 @@ public:
 	int get_key_by_index(const int node_index = 0);
 	int get_node_lvl_by_key(const int key, const int node_index = 0);
 	vector<int> get_all_tree_keys(const int node_index = 0);
-	void operator=(const BinaryTree &bt);
+	BinaryTree operator=(const BinaryTree &bt);
 	void print_tree_leaves(const int node_index = 0);
 	BinaryTree copy_subtree(const int node_index = 0);
 	void print_lvl(const int lvl);
@@ -755,17 +755,17 @@ void BinaryTree::print_tree_leaves(Node *node)
 	}
 }
 
-void BinaryTree::operator=(const BinaryTree & bt)
+BinaryTree BinaryTree::operator=(const BinaryTree &bt)
 {
-	if (&bt == this)
+	if (&bt != this)
 	{
-		return;
+		if (m_root != nullptr)
+		{
+			delete_tree();
+		}
+		m_root = copy_tree(bt.m_root);
+		return *this;
 	}
-	if (m_root != nullptr)
-	{
-		delete_tree();
-	}
-	m_root = copy_tree(bt.m_root);
 }
 
 BinaryTree::Node *BinaryTree::node(Node *subTreeRoot, int nodeIndex)
