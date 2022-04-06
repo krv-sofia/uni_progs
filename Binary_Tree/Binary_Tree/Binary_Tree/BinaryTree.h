@@ -2,7 +2,7 @@
 #include <vector>
 #include <locale.h>
 #include <cassert>
-#include<iomanip>
+
 
 using namespace std;
 
@@ -685,9 +685,17 @@ void BinaryTree::print_lvl(const int lvl)
 void BinaryTree::print_tree()
 {
 	int tree_height = get_tree_height();
+	int spaces_count = 0;
+	int k = 1;
 	cout << "tree_height = " << tree_height << endl;
 	for (int i = 0; i < tree_height; i++)
 	{
+		k *= 2;
+		spaces_count = (1 << tree_height) - k;
+		for (int j = 0; j < spaces_count; j++)
+		{
+			cout << " ";
+		}
 		print_lvl(m_root, i);
 		cout << endl;
 	}
@@ -700,36 +708,25 @@ void BinaryTree::print_lvl(Node *node, const int lvl, const int current_lvl)
 		cout << "\nthe tree is empty";
 		return;
 	}
-	
-	if (lvl == 0)
+	if (node == nullptr)
 	{
-		cout << node->m_key;
-		return;
-	}
-	if ((current_lvl == lvl) && (node != nullptr))
-	{
-		cout << node->m_key << "   ";
-	}
-	else if ((current_lvl == lvl) && (node == nullptr))
-	{
-		cout << "X  ";
-	}
-	else if (current_lvl < lvl)
-	{
-		if (node == nullptr)
+		int amount = 1 << (lvl - current_lvl);
+		for (int i = 0; i < amount; i++)
 		{
-			cout << "x  x  ";
+			cout << "xx  ";
+		}
+	}
+	else
+	{
+		if (current_lvl == lvl)
+		{
+			cout << node->m_key << "  ";
 		}
 		else
 		{
 			print_lvl(node->m_left_child, lvl, current_lvl + 1);
 			print_lvl(node->m_right_child, lvl, current_lvl + 1);
 		}
-	}
-	else
-	{
-		/*cout << "this level doesn't exist";*/
-		return;
 	}
 }
 
