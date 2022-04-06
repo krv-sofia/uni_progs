@@ -157,15 +157,15 @@ int BinaryTree::get_tree_height(const int node_index)
 	return get_tree_height(node(node_index));
 }
 
-int BinaryTree::get_tree_height(Node *node)
+int BinaryTree::get_tree_height(Node *subtree_root)
 {
-	if (node == nullptr)
+	if (subtree_root == nullptr)
 	{
 		return 0;
 	}
 	int height = 0;
 	vector<Node*> currentLevelNodes;
-	currentLevelNodes.push_back(node);
+	currentLevelNodes.push_back(subtree_root);
 
 	while (currentLevelNodes.size() != 0)
 	{
@@ -339,6 +339,32 @@ bool BinaryTree::add_node(const int key, const int node_index)
 			 delete node;
 			 return true;
 		 }
+		 else if (node->m_left_child != nullptr && node->m_right_child != nullptr)
+		 {
+			 Node *parent, *tmp;
+			 tmp = m_root;
+			 parent = find_parent_node(node, m_root);
+			 if (parent->m_left_child == node)
+			 {
+				 parent->m_left_child = node->m_left_child;
+				 while (tmp->m_left_child != nullptr)
+				 {
+					 tmp = tmp->m_left_child;
+				 }
+				 tmp->m_left_child = node->m_right_child;
+			 }
+			 else
+			 {
+				 parent->m_right_child = node->m_left_child;
+				 while (tmp->m_left_child != nullptr)
+				 {
+					 tmp = tmp->m_left_child;
+				 }
+				 tmp->m_left_child = node->m_right_child;
+			 }
+			 delete node;
+			 return true;
+		 }
 		 else if (node->m_left_child != nullptr || node->m_right_child != nullptr)
 		 {
 			 Node *temp;
@@ -368,32 +394,6 @@ bool BinaryTree::add_node(const int key, const int node_index)
 			 delete node;
 			 return true;
 		 }
-		 else if (node->m_left_child != nullptr && node->m_right_child != nullptr)
-		 {
-			 Node *parent, *tmp;
-			 tmp = m_root;
-			 parent = find_parent_node(node, m_root);
-			 if (parent->m_left_child == node)
-			 {
-				parent->m_left_child = node->m_left_child;
-				while (tmp->m_left_child != nullptr)
-				{
-					tmp = tmp->m_left_child;
-				}
-				tmp->m_left_child = node->m_right_child;
-			 }
-			 else
-			 {
-				parent->m_right_child = node->m_left_child;
-				while (tmp->m_left_child != nullptr)
-				{
-					tmp = tmp->m_left_child;
-				}
-				tmp->m_left_child = node->m_right_child;
-			 }
-			 delete node;
-			 return true;
-		 }
 	 }
 	 if (node->m_left_child != nullptr && node->m_right_child != nullptr)
 	 {
@@ -414,9 +414,15 @@ bool BinaryTree::add_node(const int key, const int node_index)
 		 delete node;
 		 return true;
 	 }
-	 else
+	 else if (node->m_right_child != nullptr)
 	 {
 		 m_root = node->m_right_child;
+		 delete node;
+		 return true;
+	 }
+	 else
+	 {
+		 m_root = nullptr;
 		 delete node;
 		 return true;
 	 }
@@ -429,23 +435,44 @@ bool BinaryTree::delete_node_by_key(const int key)
 	return delete_node(node(node_index));
  }
 
- BinaryTree::Node *BinaryTree::find_parent_node(Node *node, Node *current_node)
+ BinaryTree::Node *BinaryTree::find_parent_node(Node *child, Node *subtree_root)
  {
-	 if (current_node->m_left_child != nullptr)
+	 if (subtree_root == nullptr)
 	 {
-		 if (current_node->m_left_child == node)
-		 {
-			 return current_node;
-		 }
-		 find_parent_node(node, current_node->m_left_child);
+		 return nullptr;
+	 } if (subtree_root->m_left_child == child || subtree_root->m_right_child == child)
+	 {
+		 return subtree_root;
 	 }
-	 if (current_node->m_right_child != nullptr)
+	 vector<Node*> currentLevelNodes;
+	 currentLevelNodes.push_back(subtree_root);
+
+	 while (currentLevelNodes.size())
 	 {
-		 if (current_node->m_right_child == node)
+		 vector<Node*> nextLevelNodes;
+		 nextLevelNodes.reserve(currentLevelNodes.size() * 2);
+
+		 for (Node* node : currentLevelNodes)
 		 {
-			 return current_node;
+			 if (node->m_left_child != nullptr)
+			 {
+				 if (node->m_left_child == child)
+				 {
+					 return node;
+				 }
+				 nextLevelNodes.push_back(node->m_left_child);
+			 }
+
+			 if (node->m_right_child != nullptr)
+			 {
+				 if (node->m_right_child == child)
+				 {
+					 return node;
+				 }
+				 nextLevelNodes.push_back(node->m_right_child);
+			 }
 		 }
-		 find_parent_node(node, current_node->m_right_child);
+		 currentLevelNodes.swap(nextLevelNodes);
 	 }
  }
 
