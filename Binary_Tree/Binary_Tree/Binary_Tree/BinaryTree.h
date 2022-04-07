@@ -474,6 +474,7 @@ bool BinaryTree::delete_node_by_key(const int key)
 		 }
 		 currentLevelNodes.swap(nextLevelNodes);
 	 }
+	 return nullptr;
  }
 
 bool BinaryTree::is_balanced(const int node_index)
