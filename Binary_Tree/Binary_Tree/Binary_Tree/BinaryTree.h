@@ -40,11 +40,11 @@ public:
 	bool is_empty(const int node_index = 0);
 	int get_tree_height(const int node_index = 0);
 	int get_nodes_amount(const int node_index = 0);
-	int get_min_key(const int node_index = 0);
-	int get_max_key(const int node_index = 0);
-	bool add_node(const int key, const int node_index = 0);
-	bool delete_node(const int node_index = 0);
-	bool delete_node_by_key(const int key);
+	virtual int get_min_key(const int node_index = 0);
+	virtual int get_max_key(const int node_index = 0);
+	virtual bool add_node(const int key, const int node_index = 0);
+	virtual bool delete_node(const int node_index = 0);
+	virtual bool delete_node_by_key(const int key);
 	bool is_balanced(const int node_index = 0);
 	int get_keys_sum(const int node_index = 0);
 	int get_node_index(const int key, const int node_index = 0);
@@ -56,9 +56,8 @@ public:
 	BinaryTree copy_subtree(const int node_index = 0);
 	void print_lvl(const int lvl);
 	void print_tree();
-	
+
 private:
-	Node *m_root = nullptr;
 	void delete_tree(Node*);
 	void delete_subtrees(Node*);
 	int get_tree_height(Node*);
@@ -67,7 +66,6 @@ private:
 	int get_max_key(Node*, int &max_key);
 	bool add_node(Node*, const int key);
 	bool delete_node(Node*);
-	Node *find_parent_node(Node*, Node*);
 	bool is_balanced(Node*);
 	int get_keys_sum(Node*, int &sum);
 	int get_node_index(Node*, const int key);
@@ -76,9 +74,11 @@ private:
 	Node* copy_tree(const Node*);  
 	BinaryTree copy_subtree(const Node*);
 	void print_tree_leaves(Node*);
-
 	void print_lvl(Node*, const int lvl, const int current_lvl = 0);
 
+protected:
+	Node *m_root = nullptr;
+	Node *find_parent_node(Node*, Node*);
 };
 
 int BinaryTree::Node::get_node_key()
@@ -440,7 +440,8 @@ bool BinaryTree::delete_node_by_key(const int key)
 	 if (subtree_root == nullptr)
 	 {
 		 return nullptr;
-	 } if (subtree_root->m_left_child == child || subtree_root->m_right_child == child)
+	 } 
+	 if (subtree_root->m_left_child == child || subtree_root->m_right_child == child)
 	 {
 		 return subtree_root;
 	 }
