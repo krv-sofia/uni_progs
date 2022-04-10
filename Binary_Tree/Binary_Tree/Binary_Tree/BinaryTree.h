@@ -49,7 +49,7 @@ public:
 	int get_keys_sum(const int node_index = 0);
 	int get_node_index(const int key, const int node_index = 0);
 	int get_key_by_index(const int node_index = 0);
-	int get_node_lvl_by_key(const int key, const int node_index = 0);
+	virtual int get_node_lvl_by_key(const int key, const int node_index = 0);
 	vector<int> get_all_tree_keys(const int node_index = 0);
 	BinaryTree operator=(const BinaryTree &bt);
 	void print_tree_leaves(const int node_index = 0);
@@ -71,7 +71,6 @@ private:
 	int get_node_index(Node*, const int key);
 	int get_node_lvl_by_key(Node*, const int key);
 	vector<int> get_all_tree_keys(Node*);
-	Node* copy_tree(const Node*);  
 	BinaryTree copy_subtree(const Node*);
 	void print_tree_leaves(Node*);
 	void print_lvl(Node*, const int lvl, const int current_lvl = 0);
@@ -79,6 +78,7 @@ private:
 protected:
 	Node *m_root = nullptr;
 	Node *find_parent_node(Node*, Node*);
+	Node *copy_tree(const Node*);
 };
 
 int BinaryTree::Node::get_node_key()
