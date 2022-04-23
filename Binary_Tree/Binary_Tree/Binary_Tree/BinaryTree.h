@@ -13,6 +13,7 @@ public:
 	{
 	public:
 		int m_key;
+		int balance;
 		Node *m_left_child;
 		Node *m_right_child;
 		
@@ -21,6 +22,7 @@ public:
 			m_key = key;
 			m_left_child = left_child;
 			m_right_child = right_child;
+			balance = 0;
 		}
 		int get_node_key();
 		int get_node_children_amount();
@@ -60,13 +62,13 @@ public:
 private:
 	void delete_tree(Node*);
 	void delete_subtrees(Node*);
-	int get_tree_height(Node*);
+
 	int get_nodes_amount(Node*, int &amount);
 	int get_min_key(Node*, int &min_key);
 	int get_max_key(Node*, int &max_key);
 	bool add_node(Node*, const int key);
 	bool delete_node(Node*);
-	bool is_balanced(Node*);
+
 	int get_keys_sum(Node*, int &sum);
 	int get_node_index(Node*, const int key);
 	int get_node_lvl_by_key(Node*, const int key);
@@ -79,6 +81,8 @@ protected:
 	Node *m_root = nullptr;
 	Node *find_parent_node(Node*, Node*);
 	Node *copy_tree(const Node*);
+	int get_tree_height(Node*);
+	bool is_balanced(Node*);
 };
 
 int BinaryTree::Node::get_node_key()
