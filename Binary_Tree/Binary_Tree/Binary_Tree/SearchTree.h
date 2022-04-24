@@ -9,7 +9,7 @@ public:
 
 	int get_min_key(const int node_index = 0) override;
 	int get_max_key(const int node_index = 0) override;
-	virtual bool add_node(const int key, const int node_index = 0) override;
+	bool add_node(const int key, const int node_index = 0) override;
 	bool delete_node(const int node_index = 0) override;
 	bool delete_node_by_key(const int key) override;
 	int get_node_lvl_by_key(const int key, const int node_index = 0) override;

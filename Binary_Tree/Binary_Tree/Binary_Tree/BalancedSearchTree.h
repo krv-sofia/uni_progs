@@ -15,7 +15,11 @@ private:
 	
 	BalancedSearchTree copy_subtree(const Node*);
 	bool add_node(Node*, const int key, bool &h);
-	bool does_need_balance(Node*, int, int key);
+	bool does_need_balance(Node*, int key);
+	void right_turn(Node*);
+	void left_turn(Node*);
+	void double_right_turn(Node*);
+	void double_left_turn(Node*);
 };
 
 
@@ -50,22 +54,102 @@ BalancedSearchTree BalancedSearchTree::operator=(const BalancedSearchTree &bst)
 	 return add_node(node(node_index), key, h);
  } 
 
- bool BalancedSearchTree::does_need_balance(Node *temp, int same_key_node, int key)
+ bool BalancedSearchTree::does_need_balance(Node *temp, int key)
  {
 	 bool needs_balance = true;
-	 if(same_key_node != -1)//вершина с таким ключом уже есть
-	 {
-		 needs_balance = false;
-	 }
-	 if (abs(temp->balance) != 2)//баланс вершины не стал хуже
-	 {
-		 needs_balance = false;
-	 }
-	 if (is_balanced(temp->m_left_child) && is_balanced(temp->m_right_child))//нижние уровни сбалансированны
+	 if (temp->balance == 0)
 	 {
 		 needs_balance = false;
 	 }
 	 return needs_balance;
+ }
+
+ void BalancedSearchTree::right_turn(Node *node)
+ {
+	 if (node == nullptr || node->m_left_child == nullptr)
+	 {
+		 return;
+	 }
+	 Node *left_child = node->m_left_child;
+	 Node *middle_child = left_child->m_right_child;
+	 left_child->m_right_child = node;
+	 node->m_left_child = middle_child;
+	 Node *parent = find_parent_node(node, m_root);
+	 if (parent != nullptr)
+	 {
+		 if (parent->m_left_child == node)
+		 {
+			 parent->m_left_child = left_child;
+		 }
+		 else
+		 {
+			 parent->m_right_child = left_child;
+		 }
+	 }
+	 else
+	 {
+		 m_root = left_child;
+	 }
+	 if (left_child->balance == -1)
+	 {
+		 left_child->balance = 0;
+		 node->balance = 0;
+	 }
+	 else
+	 {
+		 left_child->balance = 1;
+		 node->balance = -1;
+	 }
+ }
+
+ void BalancedSearchTree::left_turn(Node *node)
+ {
+	 if (node == nullptr || node->m_right_child == nullptr)
+	 {
+		 return;
+	 }
+	 Node *right_child = node->m_right_child;
+	 Node *middle_child = right_child->m_left_child;
+	 right_child->m_left_child = node;
+	 node->m_right_child = middle_child;
+	 Node *parent = find_parent_node(node, m_root);
+	 if (parent != nullptr)
+	 {
+		 if (parent->m_left_child == node)
+		 {
+			 parent->m_left_child = right_child;
+		 }
+		 else
+		 {
+			 parent->m_right_child = right_child;
+		 }
+	 }
+	 else
+	 {
+		 m_root = right_child;
+	 }
+	 if (right_child->balance == 1)
+	 {
+		 right_child->balance = 0;
+		 node->balance = 0;
+	 }
+	 else
+	 {
+		 right_child->balance = -1;
+		 node->balance = 1;
+	 }
+ }
+
+ void BalancedSearchTree::double_right_turn(Node *node)
+ {
+	 left_turn(node->m_left_child);
+	 right_turn(node);
+ }
+
+ void BalancedSearchTree::double_left_turn(Node *node)
+ {
+	 right_turn(node->m_right_child);
+	 left_turn(node);
  }
 
  bool BalancedSearchTree::add_node(Node *node, const int key, bool &needs_balance)
@@ -84,75 +168,38 @@ BalancedSearchTree BalancedSearchTree::operator=(const BalancedSearchTree &bst)
 	 }
 	 Node *temp;
  	 temp = node;
-	 int same_key_node = get_node_index(key);
-	 bool needs_balance;
+	 if (get_node_index(key) != -1)
+	 {
+		 return false;
+	 }
 	 if (key >= temp->m_key)
 	 {
 		 if (temp->m_right_child == nullptr)
 		 {
 			 temp->m_right_child = new Node(key);
 			 temp->balance++;
-			 return true;
 		 }
 		 else
 		 {
 			 add_node(temp->m_right_child, key, needs_balance);
 		 }
-		 needs_balance = does_need_balance(temp, same_key_node, key);
-		 if (needs_balance == false)
+		 temp->balance = get_tree_height(temp->m_right_child) - get_tree_height(temp->m_left_child);
+		 if (temp->balance < 2)//балансировка не требуется
 		 {
 			 return true;
 		 }
 		 else
 		 {
-			 if (temp->balance == -1)
+			 if (temp->m_right_child->balance > -1)
 			 {
-				 temp->balance = 0;
-				 needs_balance = false;
-				 return true;
+				left_turn(temp);
 			 }
-			 if (temp->balance == 0)
+			 else
 			 {
-				 temp->balance = 1;
-				 return true;
+				double_left_turn(temp);
 			 }
-			 if (temp->balance == 1)
-			 {
-				 temp->balance = 2;
-				 if (temp->m_right_child->balance == 1)
-				 {
-					 //левый поворот относительно temp
-					 temp->balance = 0;
-					 temp->m_right_child->balance = 0;
-				 }
-				 if (temp->m_right_child->balance == -1)
-				 {
-					 Node *p;
-					 p = temp->m_right_child->m_left_child;
-					 //правый поворот относительно temp->m_right_child
-					 //левый поворот относительно temp
-					 if (p->balance == 1)
-					 {
-						 temp->balance = -1;
-						 temp->m_right_child->balance = 0;
-					 }
-					 if (p->balance == -1)
-					 {
-						 temp->balance = 0;
-						 temp->m_right_child->balance = 1;
-					 }
-					 if (p->balance == 0)
-					 {
-						 temp->balance = 0;
-						 temp->m_right_child->balance = 0;
-					 }
-					 p->balance = 0;
-					 temp = p;
-					 //двукратный поворот налево??
-				 }
-				 needs_balance = false;
-				 return true;
-			 }
+			 needs_balance = false;
+			 return true;
 		 }
 	 }
 	 if (key < temp->m_key)
@@ -160,70 +207,32 @@ BalancedSearchTree BalancedSearchTree::operator=(const BalancedSearchTree &bst)
 		 if (temp->m_left_child == nullptr)
 		 {
 			 temp->m_left_child = new Node(key);
+			 cout << endl << key;
 			 temp->balance--;
-			 return true;
 		 }
 		 else
 		 {
 			add_node(temp->m_left_child, key, needs_balance);
 		 }
-		 needs_balance = does_need_balance(temp, same_key_node, key);
-		 if (needs_balance == false)
+		 temp->balance = get_tree_height(temp->m_right_child) - get_tree_height(temp->m_left_child);
+		 if (temp->balance > -2)
 		 {
 			 return true;
 		 }
 		 else
 		 {
-			 if (temp->balance == 1)
+			 if (temp->m_left_child->balance < 1)
 			 {
-				 temp->balance = 0;
-				 needs_balance = false;
-				 return true;
+				 right_turn(temp);
+				 temp = temp->m_left_child;
 			 }
-			 if (temp->balance == 0)
+			 else 
 			 {
-				 temp->balance = -1;
-				 return true;
+				 double_right_turn(temp);
 			 }
-			 if (temp->balance == -1)
-			 {
-				 temp->balance = -2;
-				 if (temp->m_left_child->balance == -1)
-				 {
-					 //правый поворот относительно temp
-					 temp->balance = 0;
-					 temp->m_left_child->balance = 0;
-					 temp = temp->m_left_child;//???
-				 }
-				 else if (temp->m_left_child->balance == 1)
-				 {
-					 Node *p = temp->m_left_child->m_right_child;
-					 //поворот налево относительно temp->m_left_child
-					 //поворот направо относительно temp
-					 if (temp->balance == -1)
-					 {
-						 temp->balance = 1;
-						 temp->m_left_child->balance = 0;
-					 }
-					 if (temp->balance == 1)
-					 {
-						 temp->balance = 0;
-						 temp->m_left_child->balance = -1;
-					 }
-					 if (temp->balance == 0)
-					 {
-						 temp->balance = 0;
-						 temp->m_left_child->balance = 0;
-					 }
-					 temp->balance = 0;
-					 temp = p;//????
-				 }
-				 needs_balance = false;
-				 return true;
-			 }
+			 needs_balance = false;
+			 return true;
 		 }
-	 }
-	//
-	 
+	 } 
 	 return false;
  }

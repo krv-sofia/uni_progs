@@ -30,7 +30,7 @@ public:
 	};
 	BinaryTree() {};
 	BinaryTree(const BinaryTree &bt);
-	~BinaryTree();
+	virtual ~BinaryTree();
 	Node *node(const int node_index)
 	{
 		return node(m_root, node_index);
@@ -493,7 +493,7 @@ bool BinaryTree::is_balanced(const int node_index)
 	 {
 		 return true;
 	 }
-	 if (abs(get_tree_height(node->m_left_child) - get_tree_height(node->m_right_child)) > 1)
+ 	 if (abs(get_tree_height(node->m_left_child) - get_tree_height(node->m_right_child)) > 1)
 	 {
 		 return false;
 	 }
