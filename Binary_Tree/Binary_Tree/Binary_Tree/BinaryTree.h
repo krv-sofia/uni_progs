@@ -13,14 +13,16 @@ public:
 	{
 	public:
 		int m_key;
+		int m_balance;
 		Node *m_left_child;
 		Node *m_right_child;
 		
-		Node(int key = 0, Node *left_child = nullptr, Node *right_child = nullptr)
+		Node(int key = 0, int balance = 0,  Node *left_child = nullptr, Node *right_child = nullptr)
 		{
 			m_key = key;
 			m_left_child = left_child;
 			m_right_child = right_child;
+			m_balance = balance;
 		}
 		int get_node_key();
 		int get_node_children_amount();
@@ -28,7 +30,7 @@ public:
 	};
 	BinaryTree() {};
 	BinaryTree(const BinaryTree &bt);
-	~BinaryTree();
+	virtual ~BinaryTree();
 	Node *node(const int node_index)
 	{
 		return node(m_root, node_index);
@@ -39,7 +41,7 @@ public:
 	void delete_subtrees(const int node_index = 0);
 	bool is_empty(const int node_index = 0);
 	int get_tree_height(const int node_index = 0);
-	int get_nodes_amount(const int node_index = 0);
+
 	virtual int get_min_key(const int node_index = 0);
 	virtual int get_max_key(const int node_index = 0);
 	virtual bool add_node(const int key, const int node_index = 0);
@@ -60,13 +62,11 @@ public:
 private:
 	void delete_tree(Node*);
 	void delete_subtrees(Node*);
-	int get_tree_height(Node*);
-	int get_nodes_amount(Node*, int &amount);
 	int get_min_key(Node*, int &min_key);
 	int get_max_key(Node*, int &max_key);
 	bool add_node(Node*, const int key);
 	bool delete_node(Node*);
-	bool is_balanced(Node*);
+	int get_nodes_amount(Node*, int &amount);
 	int get_keys_sum(Node*, int &sum);
 	int get_node_index(Node*, const int key);
 	int get_node_lvl_by_key(Node*, const int key);
@@ -79,6 +79,9 @@ protected:
 	Node *m_root = nullptr;
 	Node *find_parent_node(Node*, Node*);
 	Node *copy_tree(const Node*);
+	int get_tree_height(Node*);
+	bool is_balanced(Node*);
+	int get_nodes_amount(const int node_index = 0);
 };
 
 int BinaryTree::Node::get_node_key()
@@ -489,7 +492,7 @@ bool BinaryTree::is_balanced(const int node_index)
 	 {
 		 return true;
 	 }
-	 if (abs(get_tree_height(node->m_left_child) - get_tree_height(node->m_right_child)) > 1)
+ 	 if (abs(get_tree_height(node->m_left_child) - get_tree_height(node->m_right_child)) > 1)
 	 {
 		 return false;
 	 }
@@ -687,7 +690,7 @@ BinaryTree::Node* BinaryTree::copy_tree(const Node* node)
 	Node *root = nullptr;
 	if (node != nullptr)
 	{
-		root = new Node(node->m_key);
+		root = new Node(node->m_key, node->m_balance);
 		root->m_left_child = copy_tree(node->m_left_child);
 		root->m_right_child = copy_tree(node->m_right_child);
 	}
@@ -716,7 +719,6 @@ void BinaryTree::print_tree()
 	int tree_height = get_tree_height();
 	int spaces_count = 0;
 	int k = 1;
-	cout << "tree_height = " << tree_height << endl;
 	for (int i = 0; i < tree_height; i++)
 	{
 		k *= 2;
@@ -749,7 +751,7 @@ void BinaryTree::print_lvl(Node *node, const int lvl, const int current_lvl)
 	{
 		if (current_lvl == lvl)
 		{
-			cout << node->m_key << "  ";
+			cout << node->m_key << "(" << node->m_balance << ")  ";
 		}
 		else
 		{

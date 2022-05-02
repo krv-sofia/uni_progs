@@ -126,6 +126,7 @@
     <ClCompile Include="bt_source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BalancedSearchTree.h" />
     <ClInclude Include="BinaryTree.h" />
     <ClInclude Include="SearchTree.h" />
   </ItemGroup>

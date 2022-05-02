@@ -20,9 +20,11 @@ private:
 	int get_min_key(Node*);
 	int get_max_key(Node*);
 	bool add_node(Node*, const int key);
-	bool delete_node(Node*);
 	int get_node_lvl_by_key(Node*, const int key);
 	SearchTree copy_subtree(const Node*);
+
+protected:
+	bool delete_node(Node*);
 };
 
 int SearchTree::get_min_key(const int node_index)
@@ -58,8 +60,6 @@ bool SearchTree::add_node(const int key, const int node_index)
 {
 	return add_node(node(node_index), key);
 }
-
-
 
 bool SearchTree::add_node(Node *node, const int key)
 {
