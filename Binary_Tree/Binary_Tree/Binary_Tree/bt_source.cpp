@@ -5,7 +5,6 @@
 using namespace std;
 void main()
 {
-
 	srand(time(0));
 	BalancedSearchTree bst;
 	BalancedSearchTree bst2;

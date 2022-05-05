@@ -289,31 +289,8 @@ void BalancedSearchTree::remove_min_key(Node *min_key)
 		}
 	}
 	parent->m_balance = count_balance(parent);
-	if (abs(parent->m_balance) == 2)
-	{
-		parent = make_balanced(parent);
+	balance_recount(parent);
 	}
-	if (parent->m_balance == 0)
-	{
-		while (parent != m_root && parent->m_balance == 0)
-		{
-			Node *grandparent = find_parent_node(parent, m_root);
-			if (grandparent->m_left_child == parent)
-			{
-				grandparent->m_balance++;
-			}
-			else
-			{
-				grandparent->m_balance--;
-			}
-			parent = grandparent;
-			if (abs(parent->m_balance) == 2)
-			{
-				parent = make_balanced(parent);
-			}
-		}
-	}
-}
 
 void BalancedSearchTree::balance_recount(Node *parent)
 {
