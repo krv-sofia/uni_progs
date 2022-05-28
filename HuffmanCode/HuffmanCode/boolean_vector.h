@@ -3,8 +3,9 @@ using namespace std;
 
 typedef unsigned char byte;
 
-class BooleanVector
+class BooleanVector 
 {
+	friend class HuffmanCode;
 public:
 	BooleanVector();
 	BooleanVector(int size, int num);
@@ -18,6 +19,7 @@ public:
 	int weight();
 	int get_size();
 
+	bool operator==(const BooleanVector& bv);
 	BooleanVector operator&(const BooleanVector& bv);
 	void operator&=(const BooleanVector& bv);
 	BooleanVector operator|(const BooleanVector& bv);
@@ -31,6 +33,7 @@ public:
 	BooleanVector operator~();
 	void operator=(const BooleanVector& bv);
 	int operator[](int const& bit);
+	void enlarge(int amount);
 
 	friend ostream& operator<<(ostream &os, const BooleanVector& v);
 	friend istream& operator>>(istream &is, BooleanVector& v);
@@ -42,7 +45,7 @@ private:
 
 BooleanVector::BooleanVector()
 {
-	m_size = 1;
+	m_size = 0;
 	m_memory = (m_size - 1) / 8 + 1; 
 	vector = new byte[m_memory];
 }
@@ -268,6 +271,22 @@ void BooleanVector::operator=(const BooleanVector& bv)
 	}
 }
 
+bool BooleanVector::operator==(const BooleanVector &bv)
+{
+	if (m_size > bv.m_size)
+	{
+		return false;
+	}
+	for (int i = 0; i < m_memory; i++)
+	{
+		if (vector[i] != bv.vector[i])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 BooleanVector BooleanVector::operator&(const BooleanVector& bv)
 {
 	if (&bv == this)
@@ -359,8 +378,6 @@ BooleanVector BooleanVector::operator|(const BooleanVector& bv)
 	
 	return temp;
 }
-
-
 
 void BooleanVector::operator|=(const BooleanVector& bv)
 {
@@ -531,6 +548,28 @@ int BooleanVector::operator[](int const& bit)
 	return 0;
 }
 
+void BooleanVector::enlarge(int amount)
+{
+	if (!m_memory)
+	{
+		cout << "\noperator <<=: the size of vector is 0";
+		return;
+	}
+	BooleanVector bv(*this);
+	m_size += amount;
+	if (m_size > m_memory * 8)
+	{
+		delete[]vector;
+		m_memory = (m_size - 1) / 8 + 1;
+		vector = new byte[m_memory];
+	}
+	for (int i = 0; i < bv.m_size; i++)
+	{
+		set_bit(bv[i], i + amount);
+	}
+	set_bit(0, amount - 1, amount);
+}
+
 ostream& operator<<(ostream& os, const BooleanVector& bv)
 {
 	byte mask;
@@ -606,49 +645,3 @@ istream& operator>>(istream& is, BooleanVector& bv)
 	delete[]string;
 	return is;
 }
-
-//BooleanVector BooleanVector::operator|(const BooleanVector& bv)
-//{
-//	if (&bv == this)
-//	{
-//		cout << "\noperator &: the same vector";
-//		return *this;
-//	}
-//
-//	int size, memory, min_memory;
-//	BooleanVector temp;
-//	if (m_size > bv.m_size)
-//	{
-//		temp = (m_size);
-//		//cout << "temp = " << temp << endl;
-//		memory = m_memory - 1;
-//		min_memory = bv.m_memory - 1;
-//		cout << "memory = " << memory << " min_memory = " << min_memory << endl;
-//		while (memory > min_memory)
-//		{
-//			temp.vector[memory] |= vector[memory];
-//			memory--;
-//		}
-//	}
-//	else
-//	{
-//		temp = (bv.m_size);
-//		//cout << "temp = " << temp << endl;
-//		memory = bv.m_memory - 1;
-//		min_memory = m_memory - 1;
-//		cout << "memory = " << memory << " min_memory = " << min_memory << endl;
-//		while (memory > min_memory)
-//		{
-//			temp.vector[memory] |= bv.vector[memory];
-//			memory--;
-//		}
-//	}
-//	cout << "temp = " << temp << endl;
-//	cout << "memory = " << memory << endl;
-//	//BooleanVector temp(size);
-//	for (int i = memory; i >= 0; i--)
-//	{
-//		temp.vector[i] = vector[i] | bv.vector[i];
-//	}
-//	return temp;
-//}

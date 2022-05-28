@@ -7,4 +7,5 @@ int main()
 	SetConsoleOutputCP(1251);
 	HuffmanCode hc;
 	hc.build("text.txt");
+	cout << endl << "Compression ratio: " << hc.encode("huffman_tree_file.txt", "text.txt") << "%";
 }
