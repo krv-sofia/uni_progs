@@ -60,7 +60,6 @@ BalancedSearchTree BalancedSearchTree::copy_subtree(const Node *node)
 
 bool BalancedSearchTree::add_node(const int key, const int node_index)
  {
-
 	 return add_node(node(node_index), key);
  }
 
@@ -290,7 +289,7 @@ void BalancedSearchTree::remove_min_key(Node *min_key)
 	}
 	parent->m_balance = count_balance(parent);
 	balance_recount(parent);
-	}
+}
 
 void BalancedSearchTree::balance_recount(Node *parent)
 {
@@ -365,6 +364,7 @@ void BalancedSearchTree::balance_recount(Node *parent)
 			 {
 				 min_key->m_right_child = node->m_right_child;
 			 }
+			 //min_key->m_balance = node->m_balance;
 			 min_key->m_balance = count_balance(min_key);
 			 if (abs(min_key->m_balance) == 2)
 			 {
