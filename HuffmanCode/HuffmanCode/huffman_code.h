@@ -32,7 +32,6 @@ public:
 	HuffmanTree(const HuffmanTree &ht);
 	HuffmanNode *copy_tree(const HuffmanNode*);
 	HuffmanNode *node(HuffmanNode *sub_tree_root, int node_index);
-	int find_by_symbol(HuffmanNode*, const char symbol);
 };
 
 class HuffmanCode : public HuffmanTree
@@ -55,6 +54,7 @@ public:
 	void print_tree_to_file(HuffmanNode*, const string &huffman_tree_file = "huffman_tree_file.txt");
 	HuffmanTree import_tree(const string &file_name);
 	bool make_codes_file(BooleanVector, const string &file_name);
+	bool decode(const string &file_name, const string &huffman_tree);
 };
 
 HuffmanTree::~HuffmanTree()
@@ -185,70 +185,6 @@ HuffmanTree::HuffmanNode *HuffmanTree::node(HuffmanTree::HuffmanNode *subTreeRoo
 	}
 }
 
-int HuffmanTree::find_by_symbol(HuffmanTree::HuffmanNode* node, const char symbol)
-{
-	if (node == nullptr)
-	{
-		return -1;
-	}
-	int node_index = 0;
-	for (int i = 0; i < 256; i++)
-	{
-		if (node->m_symbol[i] != 0)
-		{
-			if ((char)i == symbol)
-			{
-				return node_index;
-			}
-		}
-	}
-	vector<HuffmanTree::HuffmanNode*> currentLevelNodes;
-	currentLevelNodes.push_back(node);
-
-	while (currentLevelNodes.size() != 0)
-	{
-		vector<HuffmanTree::HuffmanNode*> nextLevelNodes;
-		nextLevelNodes.reserve(currentLevelNodes.size() * 2);
-
-		for (HuffmanTree::HuffmanNode *node : currentLevelNodes)
-		{
-			if (node->m_left_child)
-			{
-				node_index++;
-				for (int i = 0; i < 256; i++)
-				{
-					if (node->m_left_child->m_symbol[i] != 0)
-					{
-						if ((char)i == symbol)
-						{
-							return node_index;
-						}
-					}
-				}
-				nextLevelNodes.push_back(node->m_left_child);
-			}
-
-			if (node->m_right_child)
-			{
-				node_index++;
-				for (int i = 0; i < 256; i++)
-				{
-					if (node->m_right_child->m_symbol[i] != 0)
-					{
-						if ((char)i == symbol)
-						{
-							return node_index;
-						}
-					}
-				}
-				nextLevelNodes.push_back(node->m_right_child);
-			}
-		}
-		currentLevelNodes.swap(nextLevelNodes);
-	}
-	return -1;
-}
-
 void HuffmanTree::print_lvl_to_file(HuffmanNode *node, const int lvl, ofstream &fileName, const int current_lvl)
 {
 	if (!fileName.is_open())
@@ -327,7 +263,7 @@ list<HuffmanTree::HuffmanNode*> HuffmanCode::create_sorted_list(int *table)
 		}
 	}
 	nodes_list.sort(freqCompare);
-	for (HuffmanNode* temp : nodes_list)
+	/*for (HuffmanNode* temp : nodes_list)
 	{
 		for (int i = 0; i < 256; i++)
 		{
@@ -337,7 +273,7 @@ list<HuffmanTree::HuffmanNode*> HuffmanCode::create_sorted_list(int *table)
 			}
 		}
 		cout << " " << "(" << temp->m_freq << ")" << endl;
-	}
+	}*/
 	return nodes_list;
 }
 
@@ -361,7 +297,6 @@ int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
 	HuffmanTree symbols_tree = import_tree(huffman_tree);
 	BooleanVector bv1(1, 1);
 	BooleanVector bv2(1, 0);
-	int i = 0;
 	std::list<HuffmanNode*> leaves_list;
 	get_symbols_codes(symbols_tree.m_root->m_left_child, bv2, leaves_list);
 	get_symbols_codes(symbols_tree.m_root->m_right_child, bv1, leaves_list);
@@ -372,20 +307,27 @@ int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
 		return -1;
 	}
 	BooleanVector codes;
+	int size = 0;
 	while (!initial_file.eof())
 	{
 		BooleanVector symbol(256);
-		char temp = initial_file.get();
+		unsigned char temp = initial_file.get();
 		symbol.set_bit(1, (unsigned char)temp);
-		for (HuffmanTree::HuffmanNode* symbols_node : leaves_list)
 		{
-			if (symbols_node->m_symbol == symbol)
+			for (HuffmanTree::HuffmanNode* symbols_node : leaves_list)
 			{
-				codes.enlarge(symbols_node->m_symbol_code.get_size());
-				codes |= symbols_node->m_symbol_code;
+				if (symbols_node->m_symbol == symbol && !initial_file.eof())
+				{
+					codes.enlarge(symbols_node->m_symbol_code.get_size());
+					codes |= symbols_node->m_symbol_code;
+					size += symbols_node->m_symbol_code.get_size();
+				}
 			}
 		}
+		
 	}
+	//cout << endl << "SIZE: " << size << endl;
+	//cout << endl << "SIZE BV: " << codes.get_size() << endl;
 	if (!make_codes_file(codes, "encoded_text.txt"))
 	{
 		return -1;
@@ -397,18 +339,121 @@ int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
 
 bool HuffmanCode::make_codes_file(BooleanVector codes, const string &file_name)
 {
-	ofstream encoded_text("encoded_text.txt");
+	ofstream encoded_text("encoded_text.txt", ios::binary);
 	if (!encoded_text.is_open())
 	{
 		cerr << "encode: Can't create file";
 		return false;
 	}
-	encoded_text << codes.get_size() % 8;
+	if (codes.get_size() % 8 == 0)
+	{
+		encoded_text << 0;
+	}
+	else
+	{
+		encoded_text << 8 - codes.get_size() % 8;
+	}
 	for (int i = 0; i < codes.m_memory; i++)
 	{
+		BooleanVector bv(8, 1);
 		encoded_text << codes.vector[i];
+		bv.vector[0] &= codes.vector[i];
+		//cout << bv;
 	}
+	//cout << endl << "codes size: " << codes.get_size() << endl;
 	encoded_text.close();
+	return true;
+}
+
+bool HuffmanCode::decode(const string &file_name, const string &huffman_tree)
+{
+	HuffmanTree symbols_tree = import_tree(huffman_tree);
+	ifstream encoded_file(file_name, ios::binary);
+	ofstream decoded_file("decoded_file.txt");
+	if (!decoded_file.is_open())
+	{
+		cerr << "decode: Can't create decoded file";
+		return false;
+	}
+	if (!encoded_file.is_open())
+	{
+		cerr << "decode: Can't open the encoded file";
+		return false;
+	}
+	int extra_bits = encoded_file.get() - '0';
+	BooleanVector bv;
+	unsigned char ch;
+	int count = 0;
+	
+	while (!encoded_file.eof())
+	{
+		ch = encoded_file.get();
+		if (!encoded_file.eof())
+		{
+			bv.enlarge(8);
+			bv.vector[bv.m_memory - 1] = ch;
+			count++;
+		}
+	}
+	//cout << endl << count;
+	bv.m_size -= extra_bits;
+	//cout << endl << bv << endl << bv.m_size;
+	HuffmanTree::HuffmanNode* temp = symbols_tree.m_root;
+	//cout << endl;
+	for (int i = bv.m_size-1; i >= 0; i--)
+	{
+		if (bv[i] == 1)
+		{
+			if (temp->m_right_child)
+			{
+				//cout << bv[i];
+				temp = temp->m_right_child;
+			}
+			else
+			{
+				for (int j = 0; j < 256; j++)
+				{
+					if (temp->m_symbol[j] != 0)
+					{
+						decoded_file << (unsigned char)j;
+						//cout << " " << (unsigned char)j << " ";
+					}
+				}
+				//cout << bv[i];
+				temp = symbols_tree.m_root->m_right_child;
+			}
+		}
+		if (bv[i] == 0)
+		{
+			if (temp->m_left_child)
+			{
+				//cout << bv[i];
+				temp = temp->m_left_child;
+			}
+			else
+			{
+				for (int j = 0; j < 256; j++)
+				{
+					if (temp->m_symbol[j] != 0)
+					{
+						decoded_file << (unsigned char)j;
+						//cout << " " << (unsigned char)j << " ";
+					}
+				}
+				//cout << bv[i];
+				temp = symbols_tree.m_root->m_left_child;
+			}
+		}
+	}
+	for (int i = 0; i < 256; i++)
+	{
+		if (temp->m_symbol[i] != 0)
+		{
+			decoded_file << (unsigned char)i;
+		}
+	}
+	encoded_file.close();
+	decoded_file.close();
 	return true;
 }
 
@@ -421,20 +466,21 @@ void HuffmanCode::get_symbols_codes(HuffmanTree::HuffmanNode* symbols_node, Bool
 	if (symbols_node->m_left_child == nullptr && symbols_node->m_right_child == nullptr)
 	{
 		symbols_node->m_symbol_code = code_bv;
-		for (int i = 0; i < 256; i++)
+		/*for (int i = 0; i < 256; i++)
 		{
 			if (symbols_node->m_symbol[i] != 0)
 			{
-				cout << (char)i;
+				cout << (unsigned char)i;
 			}
 		}
-		cout << " CODE: " << code_bv << endl;
+		cout << " CODE: " << code_bv << endl;*/
 		leaves_list.push_back(symbols_node);
 	}
 	else
 	{
-		get_symbols_codes(symbols_node->m_left_child, code_bv << 1, leaves_list);
-		get_symbols_codes(symbols_node->m_right_child, (code_bv << 1)|BooleanVector(1, 1), leaves_list);
+		code_bv.enlarge(1);
+		get_symbols_codes(symbols_node->m_left_child, code_bv, leaves_list);
+		get_symbols_codes(symbols_node->m_right_child, code_bv|BooleanVector(1, 1), leaves_list);
 	}
 }
 
@@ -457,23 +503,23 @@ HuffmanTree HuffmanCode::create_tree(list<HuffmanNode*> nodes_list)
 		nodes_list.sort(freqCompare);
 	}
 	symbols_tree.m_root = nodes_list.front();
-	for (HuffmanNode* temp : nodes_list)
+	/*for (HuffmanNode* temp : nodes_list)
 	{
 		for (int i = 0; i < 256; i++)
 		{
 			if (temp->m_symbol[i] != 0)
 			{
-				cout << (char)i;
+				cout << (unsigned char)i;
 			}
 		}
 		cout << " " << "(" << temp->m_freq << ")" << endl;
-	}
+	}*/
 	return symbols_tree;
 }
 
 void HuffmanCode::print_tree_to_file(HuffmanNode *tree_root, const string &huffman_tree_file)
 {
-	ofstream tree_file(huffman_tree_file);
+	ofstream tree_file(huffman_tree_file, ios::binary);
 	if (!tree_file.is_open())
 	{
 		cerr << "print_tree_to_file: Can't create file";
@@ -507,9 +553,8 @@ HuffmanTree HuffmanCode::import_tree(const string &file_name)
 	ht.m_root = new HuffmanTree::HuffmanNode();
 	for (int i = 0; i < lenght; i++)
 	{
-		char symbol = tree_file.get();
+		unsigned char symbol = tree_file.get();
 		ht.m_root->m_symbol.set_bit(1, (unsigned char)symbol);
-		//cout << 496;
 	}
 	ht.m_root->m_freq = freq;
 	vector<HuffmanTree::HuffmanNode*> currentLevelNodes;
@@ -522,12 +567,6 @@ HuffmanTree HuffmanCode::import_tree(const string &file_name)
 		for (HuffmanTree::HuffmanNode* node : currentLevelNodes)
 		{
 			int length, freq;
-			/*if (node == nullptr)
-			{
-				tree_file >> length;
-				tree_file >> length;
-				continue;
-			}*/
 			tree_file >> length;
 			if (length > 0)
 			{
@@ -537,9 +576,8 @@ HuffmanTree HuffmanCode::import_tree(const string &file_name)
 				node->m_left_child = new HuffmanTree::HuffmanNode();
 				for (int i = 0; i < length; i++)
 				{
-					char symbol = tree_file.get();
+					unsigned char symbol = tree_file.get();
 					node->m_left_child->m_symbol.set_bit(1, (unsigned char)symbol);
-					//cout << 519;
 				}
 				node->m_left_child->m_freq = freq;
 				nextLevelNodes.push_back(node->m_left_child);
@@ -557,9 +595,8 @@ HuffmanTree HuffmanCode::import_tree(const string &file_name)
 				node->m_right_child = new HuffmanTree::HuffmanNode();
 				for (int i = 0; i < length; i++)
 				{
-					char symbol = tree_file.get();
+					unsigned char symbol = tree_file.get();
 					node->m_right_child->m_symbol.set_bit(1, (unsigned char)symbol);
-					//cout << 536;
 				}
 				node->m_right_child->m_freq = freq;
 				nextLevelNodes.push_back(node->m_right_child);
@@ -572,7 +609,6 @@ HuffmanTree HuffmanCode::import_tree(const string &file_name)
 		currentLevelNodes.swap(nextLevelNodes);
 	}
 	tree_file.close();
-	print_tree_to_file(ht.m_root, "imported_tree.txt");
 	return ht;
 }
 

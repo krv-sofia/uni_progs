@@ -48,6 +48,7 @@ BooleanVector::BooleanVector()
 	m_size = 0;
 	m_memory = (m_size - 1) / 8 + 1; 
 	vector = new byte[m_memory];
+	vector[0] = 0;
 }
 
 BooleanVector::BooleanVector(int size, int num = 0)
@@ -62,7 +63,7 @@ BooleanVector::BooleanVector(int size, int num = 0)
 	vector = new byte[m_memory];
 	for (int i = 0; i < m_memory; i++)
 	{
-		vector[i] &= 0;
+		vector[i] = 0;
 	}
 	if (!num)
 	{
@@ -215,7 +216,18 @@ void BooleanVector::set_bit(int num, int bit, int amount = 1)
 
 void BooleanVector::set_all(int num)
 {
-	set_bit(num, m_size - 1, m_size);
+	for (int i = 0; i < m_memory; i++)
+	{
+		vector[i] = 0;
+	}
+	if (num == 1)
+	{
+		BooleanVector bv(8, 1);
+		for (int i = 0; i < m_memory; i++)
+		{
+			vector[i] |= bv.vector[0];
+		}
+	}
 }
 
 int BooleanVector::weight()
@@ -334,49 +346,37 @@ BooleanVector BooleanVector::operator|(const BooleanVector& bv)
 		cout << "\noperator &: the same vector";
 		return *this;
 	}
-
-	int size, memory, min_memory;
-	bool flag;
-	if (m_size > bv.m_size)
+	BooleanVector newVector(m_size > bv.m_size ? m_size : bv.m_size, 0);
+	int i, j;
+	if (m_memory > bv.m_memory)
 	{
-		size = m_size;
-		memory = m_memory - 1;
-		min_memory = bv.m_memory - 1;
-		flag = true;
+		for (i = m_memory-1, j = bv.m_memory-1; i >= 0 || j >= 0; i--, j--)
+		{
+			if (i >= 0)
+			{
+				newVector.vector[i] |= vector[i];
+			}
+			if (j >= 0)
+			{
+				newVector.vector[i] |= bv.vector[j];
+			}
+		}
 	}
 	else
 	{
-		size = bv.m_size;
-		memory = bv.m_memory - 1;
-		min_memory = m_memory - 1;
-		flag = false;
-	}
-	BooleanVector temp(size);
-	int i, index_vector;
-	for (i = min_memory, index_vector = memory; i >= 0; i--, index_vector--)
-	{
-		if (flag)
+		for (i = m_memory-1, j = bv.m_memory-1; i >= 0 || j >= 0; i--, j--)
 		{
-			temp.vector[index_vector] = vector[index_vector] | bv.vector[i];
-		}
-		else
-		{
-			temp.vector[index_vector] = vector[i] | bv.vector[index_vector];
+			if (i >= 0)
+			{
+				newVector.vector[j] |= vector[i];
+			}
+			if (j >= 0)
+			{
+				newVector.vector[j] |= bv.vector[j];
+			}
 		}
 	}
-	for (i = index_vector; i >= 0; i--)
-	{
-		if (flag)
-		{
-			temp.vector[i] |= vector[i];
-		}
-		else
-		{
-			temp.vector[i] |= bv.vector[i];
-		}
-	}
-	
-	return temp;
+	return newVector;
 }
 
 void BooleanVector::operator|=(const BooleanVector& bv)
@@ -562,6 +562,7 @@ void BooleanVector::enlarge(int amount)
 		delete[]vector;
 		m_memory = (m_size - 1) / 8 + 1;
 		vector = new byte[m_memory];
+		set_all(0);
 	}
 	for (int i = 0; i < bv.m_size; i++)
 	{
