@@ -279,12 +279,13 @@ list<HuffmanTree::HuffmanNode*> HuffmanCode::create_sorted_list(int *table)
 
 void HuffmanCode::build(const string &file_name)
 {
-	int *tab = new int[256];
+	int *tab;
 	std::list<HuffmanNode*> nodes_list;
 	tab = count_symbols_freq(file_name);
 	nodes_list = create_sorted_list(tab);
 	HuffmanTree tree = create_tree(nodes_list);
-	print_tree_to_file(tree.m_root);                           
+	print_tree_to_file(tree.m_root);    
+	delete[]tab;
 }
 
 int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
@@ -310,13 +311,11 @@ int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
 	int size = 0;
 	while (!initial_file.eof())
 	{
-		BooleanVector symbol(256);
 		unsigned char temp = initial_file.get();
-		symbol.set_bit(1, (unsigned char)temp);
 		{
 			for (HuffmanTree::HuffmanNode* symbols_node : leaves_list)
 			{
-				if (symbols_node->m_symbol == symbol && !initial_file.eof())
+				if (symbols_node->m_symbol[temp]==1 && !initial_file.eof())
 				{
 					codes.enlarge(symbols_node->m_symbol_code.get_size());
 					codes |= symbols_node->m_symbol_code;
@@ -324,7 +323,6 @@ int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
 				}
 			}
 		}
-		
 	}
 	//cout << endl << "SIZE: " << size << endl;
 	//cout << endl << "SIZE BV: " << codes.get_size() << endl;
@@ -335,6 +333,33 @@ int HuffmanCode::encode(const string &huffman_tree, const string &file_name)
 	initial_file.close();
 	tree_file.close();
 	return (double)(codes.m_size)/(symbols_tree.m_root->m_freq * 8) * 100;
+}
+
+void HuffmanCode::get_symbols_codes(HuffmanTree::HuffmanNode* symbols_node, BooleanVector code_bv, list<HuffmanNode*>& leaves_list)
+{
+	if (symbols_node == nullptr)
+	{
+		return;
+	}
+	if (symbols_node->m_left_child == nullptr && symbols_node->m_right_child == nullptr)
+	{
+		symbols_node->m_symbol_code = code_bv;
+		/*for (int i = 0; i < 256; i++)
+		{
+			if (symbols_node->m_symbol[i] != 0)
+			{
+				cout << (unsigned char)i;
+			}
+		}
+		cout << " CODE: " << code_bv << endl;*/
+		leaves_list.push_back(symbols_node);
+	}
+	else
+	{
+		code_bv.enlarge(1);
+		get_symbols_codes(symbols_node->m_left_child, code_bv, leaves_list);
+		get_symbols_codes(symbols_node->m_right_child, code_bv | BooleanVector(1, 1), leaves_list);
+	}
 }
 
 bool HuffmanCode::make_codes_file(BooleanVector codes, const string &file_name)
@@ -383,7 +408,6 @@ bool HuffmanCode::decode(const string &file_name, const string &huffman_tree)
 	int extra_bits = encoded_file.get() - '0';
 	BooleanVector bv;
 	unsigned char ch;
-	int count = 0;
 	
 	while (!encoded_file.eof())
 	{
@@ -392,7 +416,6 @@ bool HuffmanCode::decode(const string &file_name, const string &huffman_tree)
 		{
 			bv.enlarge(8);
 			bv.vector[bv.m_memory - 1] = ch;
-			count++;
 		}
 	}
 	//cout << endl << count;
@@ -455,33 +478,6 @@ bool HuffmanCode::decode(const string &file_name, const string &huffman_tree)
 	encoded_file.close();
 	decoded_file.close();
 	return true;
-}
-
-void HuffmanCode::get_symbols_codes(HuffmanTree::HuffmanNode* symbols_node, BooleanVector code_bv, list<HuffmanNode*>& leaves_list)
-{
-	if (symbols_node == nullptr)
-	{
-		return;
-	}
-	if (symbols_node->m_left_child == nullptr && symbols_node->m_right_child == nullptr)
-	{
-		symbols_node->m_symbol_code = code_bv;
-		/*for (int i = 0; i < 256; i++)
-		{
-			if (symbols_node->m_symbol[i] != 0)
-			{
-				cout << (unsigned char)i;
-			}
-		}
-		cout << " CODE: " << code_bv << endl;*/
-		leaves_list.push_back(symbols_node);
-	}
-	else
-	{
-		code_bv.enlarge(1);
-		get_symbols_codes(symbols_node->m_left_child, code_bv, leaves_list);
-		get_symbols_codes(symbols_node->m_right_child, code_bv|BooleanVector(1, 1), leaves_list);
-	}
 }
 
 HuffmanTree HuffmanCode::create_tree(list<HuffmanNode*> nodes_list)
