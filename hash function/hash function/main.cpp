@@ -4,7 +4,7 @@ using namespace std;
 
 int main()
 {
-	 Hash_table <string>ht(20);
+	 Hash_table <string>ht(1);
 	 Hash_table <string>ht2;
 	 ht.add_key(3, "hi");
 	 ht.add_key(17, "hello");
@@ -18,8 +18,8 @@ int main()
 	 ht.add_key(20, "wow");
 	 ht.print();
 	 ht2 = ht;
-	 cout << endl << "\\\\\\" << endl;
-	 ht2.print();
+	 cout << endl << endl;
+	 //ht2.print();
 	 ht2.delete_key(3);
 	 ht2.delete_key(17);
 	 ht2.delete_key(47);
@@ -31,13 +31,20 @@ int main()
 	 ht2.delete_key(25);
 	 ht2.delete_key(20);
 	 cout << endl << "AFTER DELETING: " << endl;
-	 ht.print();
+	 ht2.print();
 	 ht2.add_key(13, "aooao");
 	 cout << endl << "AFTER ADDING AGAIN: " << endl;
 	 ht2.print();
-	 cout << endl << "second table: ";
+	 cout << endl;
+	 cout << endl << "second hash function: ";
 	 ht.change_hash_function(hf2);
 	 ht.print();
-
-	 //ht.print();
+	 cout << endl;
+	 cout << endl << "third hash function: ";
+	 ht.change_hash_function(hf3);
+	 ht.print();
+	 cout << endl;
+	 cout << endl << "first hash function again: ";
+	 ht.change_hash_function(hf1);
+	 ht.print();
 }

@@ -40,7 +40,7 @@ struct hash_function_3 : Hash_functions
 		{
 			return K % N;
 		}
-		return (K % N + i * (1 + K % (N - 2)) % N);
+		return (K % N + i * (1 + K % (N - 2))) % N;
 	}
 } hf3;
 
@@ -139,12 +139,12 @@ template<typename T>
 	 int index = m_hash_function->hash_function(key, m_size, 1);
 	 //cout << " INDEX: " << index;
 	 m_actual_size++;
-	 /*if (m_actual_size > m_size)
+	 if (m_actual_size > m_size)
 	 {
-		 cout << endl << "sorry can't do that :(";
-		 return;
-	 }*/
-	 enlarge(1);
+		 enlarge(1);
+		 //cout << endl << "sorry can't do that :(";
+		 //return;
+	 }
 	 if (m_table[index].m_state != 1)
 	 {
 		 m_table[index].m_value = value; 
@@ -245,6 +245,7 @@ template<typename T>
 		 delete[] m_table;
 	 }
 	 m_table = new Hash_node[m_size];
+	 m_actual_size = ht.m_actual_size;
 	 m_hash_function = ht.m_hash_function;
 	 for (int i = 0; i < ht.m_size; i++)
 	 {
@@ -256,8 +257,6 @@ template<typename T>
 			m_table[i].m_state = ht.m_table[i].m_state;
 		 }
 	 }
-	/* cout << endl;
-	 temp.print();*/
 	 return *this;
  }
 
@@ -292,7 +291,8 @@ template<typename T>
 	 {
 		 if (m_table[i].m_state == 1)
 		 {
-			 cout << endl << "i = " << i << endl << " key = " << m_table[i].m_key << "| value = " << m_table[i].m_value << "| state = " << m_table[i].m_state << "| next = " << m_table[i].m_next;
+			 cout << endl << " key = " << m_table[i].m_key << "| value = " << m_table[i].m_value << "| state = " << m_table[i].m_state;
+			 cout << "| next = " << m_table[i].m_next;
 		 }
 	 }
  }
