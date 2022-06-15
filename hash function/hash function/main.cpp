@@ -4,10 +4,11 @@ using namespace std;
 
 int main()
 {
-	 Hash_table <string>ht(1);
+	 Hash_table <string>ht(5);
 	 Hash_table <string>ht2;
 	 ht.add_key(3, "hi");
 	 ht.add_key(17, "hello");
+	 ht.add_key(3, "afsfsdf");
 	 ht.add_key(47, "top of the morning");
 	 ht.add_key(124, "gm");
 	 ht.add_key(13, "asdf");

@@ -77,7 +77,7 @@ public:
 	Hash_table(int size);
 	Hash_table(Hash_table const &ht);
 	~Hash_table();
-	void add_key(int key, T value);
+	bool add_key(int key, T value);
 	void delete_key(int key);
 	bool check(int key);
 	int find_by_key(int key);
@@ -134,23 +134,27 @@ template<typename T>
 }
 
  template<typename T>
- void Hash_table<T>::add_key(int key, T value)
+ bool Hash_table<T>::add_key(int key, T value)
  {
+	 if (check(key) == true)
+	 {
+		 return false;
+	 }
 	 int index = m_hash_function->hash_function(key, m_size, 1);
-	 //cout << " INDEX: " << index;
 	 m_actual_size++;
 	 if (m_actual_size > m_size)
 	 {
-		 enlarge(1);
-		 //cout << endl << "sorry can't do that :(";
-		 //return;
+		 cout << endl << "sorry can't do that :(";
+		 m_actual_size--;
+		 return false;
 	 }
 	 if (m_table[index].m_state != 1)
 	 {
 		 m_table[index].m_value = value; 
 		 m_table[index].m_key = key;
 		 m_table[index].m_state = 1;
-		 return;
+		 //m_table[index].m_next = -1;
+		 return true;
 	 }
 	 if (m_table[index].m_state == 1)
 	 {
@@ -167,7 +171,7 @@ template<typename T>
 					 temp = &m_table[temp->m_next];
 				 }
 				 temp->m_next = i;
-				 return;
+				 return true;
 			 }
 		 }
 	 }
